@@ -6,7 +6,7 @@ import Header from './components/header/header.component'
 import SignInAndSignUpPage from './pages/sign-in-and-sign-up/sign-in-and-sign-up.component';
 import './App.css';
 
-import { auth } from './firebase/firebase.utils'
+import { auth, createUserProfileDocument } from './firebase/firebase.utils';
 
 
 
@@ -20,24 +20,51 @@ class App extends React.Component {
     }
 
   }
+  //default property
+    unsubscribeFromAuth =null
+
   //called when the component mounts. called once
     componentDidMount(){
       //continuously triggers when the auth state changes
-      auth.onAuthStateChanged(  user => {
-        //sets the new user to the current user
-        this.setState({ currentUser: user});
+      this.unsubscribeFromAuth = auth.onAuthStateChanged( async userAuth => {
 
-        //logit out
-        console.log(user);
+        //check if the userAuth is not null
+        if(userAuth){
+          const userRef = await createUserProfileDocument(userAuth);
+          //check if the user data has changed
+          userRef.onSnapshot( snapShot => {
+            
+            this.setState({
+              currentUser: {
+                id:  snapShot.id,
+                ...snapShot.data()
+              }
+            // }, () => {
+            //   console.log(this.state)
+            });
+            console.log(this.state)
+          });
+          
+        }
+        //sets the new user to the current user
+        this.setState({ currentUser: userAuth});
+      
       })
+    }
+
+    //called when component unmounts
+    componentWillUnmount(){
+
+      //closes the subscription
+      this.unsubscribeFromAuth();
     }
   render(){
   return (
     <div >
-      <Header />
+      <Header  currentUser={this.state.currentUser} />
       <Switch>
       <Route exact path='/' component={HomePage}/>
-     <Route   path='/shop' component={ShopPage}/>
+     <Route exact path='/shop' component={ShopPage}/>
      <Route path='/signin' component={SignInAndSignUpPage}/>
       </Switch>
      
