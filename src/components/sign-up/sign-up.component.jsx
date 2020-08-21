@@ -16,6 +16,7 @@ class SignUp extends React.Component{
     }
 
     handleSubmit = async event =>{
+        //prevents the default submit action
         event.preventDefault();
 
         const { displayName, email, password, confirmPassword} = this.state;
@@ -25,7 +26,8 @@ class SignUp extends React.Component{
             return;
         }
         try{
-            const {user} =await auth.createUserWithEmailAndPassword(email, password);
+            const {user} = await auth.createUserWithEmailAndPassword(email, password);
+            //after the auth is successful, save the user to the firestore
            await createUserProfileDocument(user, { displayName });
 
            this.setState({

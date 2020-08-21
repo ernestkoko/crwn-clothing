@@ -2,7 +2,7 @@ import React from 'react';
 import './sign-in.styles.scss';
 import FormInput from '../form-input/form-input.component';
 import CustomButton from '../custom-button/custom-button.component';
-import { signInWithGoogle} from '../../firebase/firebase.utils';
+import { auth, signInWithGoogle} from '../../firebase/firebase.utils';
 
 class SignIn extends React.Component{
     constructor(props){
@@ -12,9 +12,24 @@ class SignIn extends React.Component{
             password: ''
         }
     }
-    handleSubmit = event =>{
+    //prevents the default behaviour and sets both the email and password to empty strings
+    handleSubmit = async event =>{
         event.preventDefault();
+        //destructuring
+        const { email, password} = this.state;
+
+        try {
+            await auth.signInWithEmailAndPassword(email, password);
+            //if it succeeds we will clear the state
+            
         this.setState({email:'',password:''})
+            
+        } catch (error) {
+            console.log(error);
+            
+        }
+
+
 
     }
     handleChange = event =>{
